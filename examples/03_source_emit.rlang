@@ -1,0 +1,9 @@
+source temperature
+
+reactive warning = temperature > 30
+
+emit temperature = 25
+print warning
+
+emit temperature = 35
+print warning

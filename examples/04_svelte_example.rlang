@@ -1,0 +1,4 @@
+let price = 100
+let quantity = 3
+reactive total = price * quantity
+print total
