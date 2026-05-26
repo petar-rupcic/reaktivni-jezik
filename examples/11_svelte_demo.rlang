@@ -1,0 +1,9 @@
+let price = 100
+let quantity = 3
+reactive total = price * quantity
+reactive discounted = total * 0.9
+reactive expensive = discounted > 250
+
+print total
+print discounted
+print expensive

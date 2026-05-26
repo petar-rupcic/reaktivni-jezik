@@ -1,0 +1,35 @@
+let a = 10
+let b = 5
+let name = "Ana"
+let active = true
+
+reactive sum = a + b
+reactive double_sum = sum * 2
+reactive complex_result = (a + b) * 3
+reactive is_large = complex_result > 30
+
+print name
+print active
+print sum
+print double_sum
+print complex_result
+print is_large
+
+set a = 20
+
+print sum
+print double_sum
+print complex_result
+print is_large
+
+source temperature
+reactive warning = temperature > 30
+
+emit temperature = 25
+print warning
+
+emit temperature = 35
+print warning
+
+dependencies complex_result
+trace complex_result

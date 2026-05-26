@@ -50,11 +50,19 @@ class ReactiveRuntime:
     def evaluate(self, expr):
         from ast_nodes import (
             NumberLiteral,
+            StringLiteral,
+            BooleanLiteral,
             VariableExpression,
-            BinaryExpression
+            BinaryExpression,
         )
 
         if isinstance(expr, NumberLiteral):
+            return expr.value
+
+        if isinstance(expr, StringLiteral):
+            return expr.value
+
+        if isinstance(expr, BooleanLiteral):
             return expr.value
 
         if isinstance(expr, VariableExpression):
@@ -66,12 +74,35 @@ class ReactiveRuntime:
 
             if expr.operator == "+":
                 return left + right
+
             if expr.operator == "-":
                 return left - right
+
             if expr.operator == "*":
                 return left * right
+
             if expr.operator == "/":
                 return left / right
+
+            if expr.operator == ">":
+                return left > right
+
+            if expr.operator == "<":
+                return left < right
+
+            if expr.operator == ">=":
+                return left >= right
+
+            if expr.operator == "<=":
+                return left <= right
+
+            if expr.operator == "==":
+                return left == right
+
+            if expr.operator == "!=":
+                return left != right
+
+            raise Exception(f"Unknown operator: {expr.operator}")
 
         raise Exception(f"Unknown expression: {expr}")
 

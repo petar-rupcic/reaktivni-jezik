@@ -12,7 +12,7 @@ def parse_file(path):
 
 if __name__ == "__main__":
 
-    program = parse_file("examples/09_dependencies.rlang")
+    program = parse_file("examples/10_full_language_demo.rlang")
 
     analyzer = SemanticAnalyzer()
     analyzer.analyze(program)

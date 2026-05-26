@@ -3,6 +3,10 @@ from ast_nodes import (
     ReactiveStatement,
     SetStatement,
     PrintStatement,
+    SourceStatement,
+    EmitStatement,
+    DependenciesStatement,
+    TraceStatement,
     VariableExpression,
     BinaryExpression,
 )
@@ -50,6 +54,34 @@ class SemanticAnalyzer:
 
         elif isinstance(stmt, PrintStatement):
             self.analyze_expression(stmt.expression)
+
+        elif isinstance(stmt, SourceStatement):
+            if stmt.name in self.symbols:
+                raise SemanticError(
+                    f"Variable '{stmt.name}' is already defined."
+                )
+
+            self.symbols.add(stmt.name)
+
+        elif isinstance(stmt, EmitStatement):
+            if stmt.name not in self.symbols:
+                raise SemanticError(
+                    f"Source '{stmt.name}' is not defined."
+                )
+
+            self.analyze_expression(stmt.expression)
+
+        elif isinstance(stmt, DependenciesStatement):
+            if stmt.name not in self.symbols:
+                raise SemanticError(
+                    f"Variable '{stmt.name}' is not defined."
+                )
+
+        elif isinstance(stmt, TraceStatement):
+            if stmt.name not in self.symbols:
+                raise SemanticError(
+                    f"Variable '{stmt.name}' is not defined."
+                )
 
     def analyze_expression(self, expr):
 
