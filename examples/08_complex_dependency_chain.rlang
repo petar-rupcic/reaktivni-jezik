@@ -1,0 +1,13 @@
+let a = 10
+let b = 5
+
+reactive c = a + b * 2
+reactive d = (a + b) * 2
+reactive e = d - c
+
+print c
+print d
+print e
+
+set a = 20
+

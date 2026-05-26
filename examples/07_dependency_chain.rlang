@@ -1,0 +1,11 @@
+let x = 5
+reactive a = x + 1
+reactive b = a * 2
+reactive c = b + a
+reactive d = c + x
+
+print d
+
+set x = 10
+
+print d

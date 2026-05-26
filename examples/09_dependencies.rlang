@@ -2,8 +2,6 @@ let a = 10
 reactive b = a * 2
 reactive c = b + a
 
-print c
-
-set a = 20
-
-print c
+dependencies c
+dependencies b
+dependencies a
