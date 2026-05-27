@@ -1,0 +1,2 @@
+reactive a = b + 1
+reactive b = a + 1

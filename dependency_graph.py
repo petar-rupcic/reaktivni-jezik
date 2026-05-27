@@ -40,3 +40,28 @@ class DependencyGraph:
 
         for variable, deps in self.graph.items():
             print(f"{variable} depends on: {', '.join(deps)}")
+
+    def detect_cycles(self):
+        visited = set()
+        stack = set()
+
+        def dfs(node):
+            if node in stack:
+                return True  
+
+            if node in visited:
+                return False
+
+            visited.add(node)
+            stack.add(node)
+
+            for neigh in self.graph.get(node, []):
+                if dfs(neigh):
+                    return True
+
+            stack.remove(node)
+            return False
+
+        for node in self.graph:
+            if dfs(node):
+                raise Exception(f"Semantic error: circular dependency detected starting at '{node}'")

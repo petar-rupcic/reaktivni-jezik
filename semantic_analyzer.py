@@ -41,7 +41,6 @@ class SemanticAnalyzer:
                     f"Variable '{stmt.name}' is already defined."
                 )
 
-            self.analyze_expression(stmt.expression)
             self.symbols.add(stmt.name)
 
         elif isinstance(stmt, SetStatement):
@@ -86,10 +85,9 @@ class SemanticAnalyzer:
     def analyze_expression(self, expr):
 
         if isinstance(expr, VariableExpression):
-            if expr.name not in self.symbols:
-                raise SemanticError(
-                    f"Variable '{expr.name}' is not defined."
-                )
+            # reaktivni jezici dopustaju forward reference
+            # korektnost se iscitava iz dependency grafa
+            return
 
         elif isinstance(expr, BinaryExpression):
             self.analyze_expression(expr.left)

@@ -12,13 +12,14 @@ def parse_file(path):
 
 if __name__ == "__main__":
 
-    program = parse_file("examples/10_full_language_demo.rlang")
+    program = parse_file("examples/08_complex_dependency_chain.rlang")
 
     analyzer = SemanticAnalyzer()
     analyzer.analyze(program)
 
     graph = DependencyGraph()
     graph.build(program)
+    graph.detect_cycles()
 
     runtime = ReactiveRuntime(graph)
 

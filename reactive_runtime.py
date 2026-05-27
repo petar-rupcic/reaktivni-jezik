@@ -30,19 +30,20 @@ class ReactiveRuntime:
         if expr is None:
             return
 
-        new_value = self.evaluate(expr)
         old_value = self.values.get(name)
+
+        new_value = self.evaluate(expr)
+
+        if old_value == new_value:
+            return
 
         self.values[name] = new_value
 
-        if old_value != new_value:
-            print(f"{name} recomputed: {new_value}")
+        print(f"{name} recomputed: {new_value}")
+
 
     def propagate(self, changed_var):
         order = self.topological_sort(changed_var)
-
-        if changed_var in order:
-            order.remove(changed_var)
 
         for var in order:
             self.recompute(var)
@@ -66,7 +67,9 @@ class ReactiveRuntime:
             return expr.value
 
         if isinstance(expr, VariableExpression):
-            return self.values.get(expr.name, 0)
+            if expr.name not in self.values:
+                raise Exception(f"Runtime error: undefined variable '{expr.name}'")
+            return self.values[expr.name]
 
         if isinstance(expr, BinaryExpression):
             left = self.evaluate(expr.left)
@@ -82,6 +85,8 @@ class ReactiveRuntime:
                 return left * right
 
             if expr.operator == "/":
+                if right == 0:
+                    raise Exception("Runtime error: division by zero")
                 return left / right
 
             if expr.operator == ">":
