@@ -22,58 +22,69 @@ class ReactiveParser(Parser):
     def start(self):
         statements = []
 
+        # parsiraj niz izraza dok ne dodjes do kraja inputa
         while not self >= KRAJ:
             statements.append(self.statement())
 
         return Program(statements)
 
     def statement(self):
+        # let a =  expr
         if self >= T.LET:
             name = (self >> T.IDENT).sadržaj
             self >> T.EQUAL
             expression = self.expression()
             return LetStatement(name, expression)
 
+        # reactive a = expr
         if self >= T.REACTIVE:
             name = (self >> T.IDENT).sadržaj
             self >> T.EQUAL
             expression = self.expression()
             return ReactiveStatement(name, expression)
-
+        # set a = expr
         if self >= T.SET:
             name = (self >> T.IDENT).sadržaj
             self >> T.EQUAL
             expression = self.expression()
             return SetStatement(name, expression)
 
+        # print expr
         if self >= T.PRINT:
             expression = self.expression()
             return PrintStatement(expression)
 
+        # source a
         if self >= T.SOURCE:
             name = (self >> T.IDENT).sadržaj
             return SourceStatement(name)
 
+        # emit a = expr
         if self >= T.EMIT:
             name = (self >> T.IDENT).sadržaj
             self >> T.EQUAL
             expression = self.expression()
             return EmitStatement(name, expression)
 
+        # dependencies a
         if self >= T.DEPENDENCIES:
             name = (self >> T.IDENT).sadržaj
             return DependenciesStatement(name)
 
+        # trace a
         if self >= T.TRACE:
             name = (self >> T.IDENT).sadržaj
             return TraceStatement(name)
 
+        # greska u sintaksi
         raise self.greška()
 
     def expression(self):
+        # pocetna tocka za izraze namanjeg prioriteta
         return self.comparison()
 
     def comparison(self):
+        # handlea operatore usporedbe
         left = self.addition()
 
         if self >= T.GT:
@@ -103,6 +114,7 @@ class ReactiveParser(Parser):
         return left
 
     def addition(self):
+        # handlea + i - uz asocijativnost s lijeva
         left = self.multiplication()
 
         while True:
@@ -118,6 +130,7 @@ class ReactiveParser(Parser):
                 return left
 
     def multiplication(self):
+        # handlea * i / uz veci prioritet od + i -
         left = self.primary()
 
         while True:
@@ -133,14 +146,17 @@ class ReactiveParser(Parser):
                 return left
 
     def primary(self):
+        # brojevi (int ili float)
         if number := self >= T.NUMBER:
             if "." in number.sadržaj:
                 return NumberLiteral(float(number.sadržaj))
             return NumberLiteral(int(number.sadržaj))
 
+        # string literal
         if string := self >= T.STRING:
             return StringLiteral(string.sadržaj[1:-1])
 
+        # identifikator ili boolean literal
         if ident := self >= T.IDENT:
             if ident.sadržaj == "true":
                 return BooleanLiteral(True)
@@ -148,9 +164,11 @@ class ReactiveParser(Parser):
                 return BooleanLiteral(False)
             return VariableExpression(ident.sadržaj)
 
+        # zagrade
         if self >= T.LPAREN:
             expression = self.expression()
             self >> T.RPAREN
             return expression
 
+        # greska u izrazu
         raise self.greška()

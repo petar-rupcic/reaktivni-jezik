@@ -17,21 +17,33 @@ from ast_nodes import (
 
 
 class SvelteCompiler:
+    """
+    Prevoditelj iz ReactiveLang AST-a u Svelte komponentu.
+    Svaka naredba jezika prevodi se u odgovarajuci Svelte izraz ili HTML element
+    """
     def compile(self, program: Program) -> str:
+        
+        # generirani Svelte <script> dio
         script_lines = []
+
+        # generirani HTML dio
         html_lines = []
 
         script_lines.append("<script>")
 
+        # obradi svaku AST naredbu i generiraj odgovarajuci Svelte kod
         for statement in program.statements:
+            # let - standardna Svelte varijabla
             if isinstance(statement, LetStatement):
                 expression = self.compile_expression(statement.expression)
                 script_lines.append(f"  let {statement.name} = {expression};")
 
+            # reactive - Svelte reaktivna deklaracija ($:)
             elif isinstance(statement, ReactiveStatement):
                 expression = self.compile_expression(statement.expression)
                 script_lines.append(f"  $: {statement.name} = {expression};")
 
+            # set - generira funkciju i gumb za promjenu vrijednosti
             elif isinstance(statement, SetStatement):
                 expression = self.compile_expression(statement.expression)
                 script_lines.append("")
@@ -42,13 +54,16 @@ class SvelteCompiler:
                     f"<button on:click={{set_{statement.name}}}>Set {statement.name}</button>"
                 )
 
+            # print - prikaz vrijednosti u HTML-u
             elif isinstance(statement, PrintStatement):
                 expression = self.compile_expression(statement.expression)
                 html_lines.append(f"<p>{{{expression}}}</p>")
 
+            # source - simulacija vanjske vrijednosti
             elif isinstance(statement, SourceStatement):
                 script_lines.append(f"  let {statement.name} = undefined;")
 
+            # emit - funkcija koja mijenja vrijednost source varijable
             elif isinstance(statement, EmitStatement):
                 expression = self.compile_expression(statement.expression)
                 script_lines.append("")
@@ -74,6 +89,7 @@ class SvelteCompiler:
         return "\n".join(script_lines) + "\n\n" + "\n".join(html_lines)
 
     def compile_expression(self, expression) -> str:
+        # rekurzivno prevodi AST u Svelte izraz
         if isinstance(expression, NumberLiteral):
             return str(expression.value)
 

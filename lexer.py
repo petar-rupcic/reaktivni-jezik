@@ -2,6 +2,7 @@ from vepar import *
 
 
 class T(TipoviTokena):
+    # kljucne rijeci
     LET = 'let'
     REACTIVE = 'reactive'
     SET = 'set'
@@ -11,6 +12,7 @@ class T(TipoviTokena):
     DEPENDENCIES = 'dependencies'
     TRACE = 'trace'
 
+    # osnovni tokeni
     NUMBER = r'\d+(\.\d+)?'
     STRING = r'"[^"]*"'
     IDENT = r'[A-Za-z_][A-Za-z0-9_]*'
@@ -33,14 +35,17 @@ class T(TipoviTokena):
 
 @lexer
 def reactive_lexer(lex):
+    #preskoci praznine
     for znak in lex:
         if znak.isspace():
             lex.zanemari()
 
+        #identifikatori i kljucne rijeci
         elif znak.isalpha() or znak == '_':
             lex.zvijezda(lambda z: z.isalnum() or z == '_')
             yield lex.literal_ili(T.IDENT)
 
+        # intovi i floatovi
         elif znak.isdigit():
             lex.zvijezda(str.isdigit)
 
@@ -49,11 +54,13 @@ def reactive_lexer(lex):
 
             yield lex.token(T.NUMBER)
 
+        # string
         elif znak == '"':
             lex.zvijezda(lambda z: z != '"')
             lex >> '"'
             yield lex.token(T.STRING)
 
+        # operatori usporedbe i pridruzivanja
         elif znak == '=':
             if lex >= '=':
                 yield lex.token(T.EQEQ)
@@ -76,6 +83,7 @@ def reactive_lexer(lex):
             else:
                 yield lex.token(T.LT)
 
+        # aritmeticki operatori
         elif znak == '+':
             yield lex.token(T.PLUS)
 
@@ -88,6 +96,7 @@ def reactive_lexer(lex):
         elif znak == '/':
             yield lex.token(T.SLASH)
 
+        # zagrade
         elif znak == '(':
             yield lex.token(T.LPAREN)
 

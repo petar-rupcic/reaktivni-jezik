@@ -13,56 +13,69 @@ from ast_nodes import (
 
 
 class Interpreter:
+    """
+    provodi evaluaciju izraza, odrzava vrijednosti varijabli, handlea updateove reaktivnih varijabli,
+    izvrsava source/emit sistem, debugging naredbe 
+    """
     def __init__(self, runtime, dependency_graph=None):
         self.runtime = runtime
-        self.graph = dependency_graph
+        self.graph = dependency_graph # koristen kod poziva dependencies naredbe
 
     def execute(self, program):
+        # izvrsi sve izraze u 
         for stmt in program.statements:
             self.execute_statement(stmt)
 
     def execute_statement(self, stmt):
 
+        # let a = expr
         if isinstance(stmt, LetStatement):
             value = self.runtime.evaluate(stmt.expression)
             self.runtime.set_expression(stmt.name, stmt.expression)
             self.runtime.set_value(stmt.name, value)
 
+        # reactive a = expr
         elif isinstance(stmt, ReactiveStatement):
             value = self.runtime.evaluate(stmt.expression)
             self.runtime.set_expression(stmt.name, stmt.expression)
             self.runtime.set_value(stmt.name, value)
 
+        # set a = expr (aktivira propagaciju)
         elif isinstance(stmt, SetStatement):
             value = self.runtime.evaluate(stmt.expression)
 
             self.runtime.set_value(stmt.name, value)
             self.runtime.propagate(stmt.name)
 
+        # ispisi vrijednost izraza
         elif isinstance(stmt, PrintStatement):
             value = self.runtime.evaluate(stmt.expression)
             print(value)
 
+        #source uvodi vanjsku reaktivnu varijablu
         elif isinstance(stmt, SourceStatement):
-            # Source predstavlja vanjski izvor podataka.
-            # Početno ga postavljamo na 0 jer prava vrijednost dolazi preko emit naredbe.
+            # source predstavlja vanjski izvor podataka.
+            # pocetno ga postavljamo na 0 jer prava vrijednost dolazi preko emit naredbe.
             self.runtime.set_value(stmt.name, 0)
 
+        # emit simulira uvodjenje nove vrijednosti iz vanjskog izvora
         elif isinstance(stmt, EmitStatement):
-            # Emit simulira dolazak nove vrijednosti iz vanjskog izvora.
-            # Nakon promjene vrijednosti pokreće se propagacija.
+            # nakon promjene vrijednosti pokreće se propagacija
             value = self.runtime.evaluate(stmt.expression)
 
             self.runtime.set_value(stmt.name, value)
             self.runtime.propagate(stmt.name)
 
+        # ispisuje dependency informaciju iz dependency grafa
         elif isinstance(stmt, DependenciesStatement):
             self.handle_dependencies(stmt.name)
 
+        # ispisuje trace izracune reaktivnog izraza
         elif isinstance(stmt, TraceStatement):
             self.handle_trace(stmt.name)
 
     def handle_dependencies(self, name):
+        # za danu varijablu, pokazi dependencyije s drugim varijablama 
         if not self.graph:
             print(f"{name} depends on: (no graph)")
             return
@@ -75,6 +88,7 @@ class Interpreter:
             print(f"{name} depends on: {', '.join(sorted(deps))}")
 
     def handle_trace(self, name):
+        # rekonstruira detalje evaluacije izraza (za debugging)
         expression = self.runtime.expressions.get(name)
 
         if expression is None:
@@ -86,6 +100,7 @@ class Interpreter:
 
         variables = self.collect_variables(expression)
 
+        # prikazi trenutne vrijednosti svih varijabli koristenih u izrazu
         for variable in sorted(variables):
             value = self.runtime.values.get(variable, 0)
             print(f"{variable} = {value}")
@@ -94,6 +109,7 @@ class Interpreter:
         print(f"{name} = {value}")
 
     def collect_variables(self, expr):
+        # prikazi sve varijable iskoristene u izrazu
         if isinstance(expr, VariableExpression):
             return {expr.name}
 
@@ -105,6 +121,7 @@ class Interpreter:
         return set()
 
     def expression_to_string(self, expr):
+        # AST izraza pretvori nazad u string format 
         if isinstance(expr, VariableExpression):
             return expr.name
 
